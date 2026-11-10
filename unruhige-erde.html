@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Unruhige Erde – Das Spiel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#141428;--panel:#24244a;--ink:#f4f1e8;--y:#ffd400;--c:#ff9f1c;--sh:4px 4px 0 #000}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:#141428;z-index:10}body{margin:0;background:var(--bg);background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:16px 16px;color:var(--ink);font-family:"Pixelify Sans",ui-monospace,monospace;font-size:19px;line-height:1.45;min-height:100vh}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+.pix,.pixh,.btn,.hbtn,.lv,.ttype,.tt,.fbh,.node small,.wh small{font-family:"Press Start 2P",monospace}
+#app{max-width:980px;margin:0 auto;padding:12px 14px 60px}
+.panel{background:var(--panel);border:4px solid #000;box-shadow:var(--sh),inset 0 0 0 3px #3a3a6e;padding:20px;border-radius:2px}
+.btn{background:var(--y);color:#111;border:4px solid #000;box-shadow:var(--sh);padding:14px 18px;font-size:12px;letter-spacing:1px;min-height:52px}
+.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #000}.btn.big{font-size:15px;padding:18px 26px}.btn.red{background:#ff4d6d;color:#fff}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.small{font-size:15px;opacity:.75}.center{text-align:center}
+/* start */
+.start{min-height:90vh;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px}
+.logo{text-align:center}.pix{font-size:28px;color:var(--y);text-shadow:4px 4px 0 #b3261e,8px 8px 0 #000}.pix.big{font-size:64px;color:#ff7a1a;margin-top:10px}
+.logo .sub{font-family:"Press Start 2P";font-size:10px;margin-top:20px;opacity:.85;line-height:1.8}
+.start .panel{max-width:520px;width:100%;text-align:center}.lbl{display:block;text-align:left;font-weight:600;margin:14px 0 6px}
+input,textarea{width:100%;font-family:inherit;font-size:19px;background:#0d0d1d;color:var(--ink);border:3px solid #000;box-shadow:inset 3px 3px 0 #000;padding:12px;border-radius:0;margin-bottom:12px}
+textarea{resize:vertical;min-height:170px}
+/* hud */
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;align-items:center;gap:12px;background:#0d0d1d;border:4px solid #000;box-shadow:var(--sh);padding:8px 10px;margin-bottom:18px}
+.hbtn{background:#3a3a6e;border:3px solid #000;padding:10px 10px;font-size:10px;color:#fff;min-height:44px}
+.hrank{flex:1;min-width:0}.hrank b{font-size:17px}.lv{font-size:10px;background:var(--y);color:#111;padding:3px 6px}
+.hrank small{display:block;font-size:13px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar{height:12px;background:#000;border:2px solid #000;margin:4px 0}.bar i{display:block;height:100%;background:repeating-linear-gradient(90deg,#4ade80 0 8px,#22c55e 8px 10px)}
+.hcoins{display:flex;align-items:center;gap:6px;font-family:"Press Start 2P";font-size:16px;color:var(--y)}
+.coin{width:22px;height:22px;vertical-align:-4px;image-rendering:pixelated}
+/* map */
+.pixh{font-size:18px;color:var(--y);text-shadow:3px 3px 0 #000;line-height:1.5;margin:6px 0 10px;text-align:center}
+.path{display:flex;flex-direction:column;gap:22px;margin:22px 0;position:relative}
+.path:before{content:"";position:absolute;left:50%;top:20px;bottom:20px;border-left:6px dashed #3a3a6e;z-index:0}
+.node{position:relative;z-index:1;width:min(560px,92%);display:flex;gap:16px;align-items:center;text-align:left;background:var(--panel);border:4px solid #000;box-shadow:var(--sh),inset 0 -6px 0 var(--c);padding:16px;border-radius:2px}
+.node.l{align-self:flex-start}.node.r{align-self:flex-end}
+.node:active{transform:translate(3px,3px)}
+.node .ico{font-size:46px;width:72px;height:72px;display:grid;place-items:center;background:var(--c);border:4px solid #000;flex:none}
+.node small{font-size:9px;color:var(--c)}.node b{display:block;font-size:21px}.node em{display:block;font-style:normal;opacity:.8;font-size:16px}
+.nm{display:block;margin-top:6px;font-size:17px}.st{color:var(--y);letter-spacing:2px;margin-left:8px}
+.node.locked{filter:grayscale(1);opacity:.6;cursor:not-allowed}.node .lk{color:#ff8fa3;font-size:14px;margin-top:4px}
+.foot{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:30px}
+.lnk{background:none;border:2px solid #3a3a6e;padding:8px 12px;font-size:15px;opacity:.85}
+/* world */
+.wh{display:flex;gap:16px;align-items:center;margin-bottom:18px}.wh .ico{font-size:52px;background:var(--c);border:4px solid #000;box-shadow:var(--sh);width:84px;height:84px;display:grid;place-items:center;flex:none}
+.wh .pixh{text-align:left;margin:4px 0}.wh small{font-size:9px;color:var(--c)}.wh p{margin:0;opacity:.85}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+.tile{position:relative;text-align:left;background:var(--panel);border:4px solid #000;box-shadow:var(--sh);padding:14px 14px 12px;display:flex;flex-direction:column;gap:6px;min-height:170px}
+.tile:active{transform:translate(3px,3px)}.tile.done{box-shadow:var(--sh),inset 0 0 0 3px #4ade80}.tile.part{box-shadow:var(--sh),inset 0 0 0 3px var(--y)}
+.tn{position:absolute;top:-12px;left:-12px;background:var(--c);color:#111;border:3px solid #000;font-family:"Press Start 2P";font-size:11px;width:34px;height:34px;display:grid;place-items:center}
+.tt{font-size:8px;color:var(--c);margin-left:22px}.tq{flex:1;font-size:16px}.tc{font-size:16px;color:var(--y)}
+/* task */
+.tbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;font-family:"Press Start 2P";font-size:10px}
+.ttype{margin-left:auto;background:var(--c);color:#111;padding:6px 8px;border:3px solid #000}
+.q{font-size:22px;margin:0 0 6px;line-height:1.35}.info{font-size:15px;color:var(--y);margin-bottom:16px}
+.hint{font-size:15px;opacity:.7;margin:10px 0 6px}.msg{color:#ff8fa3;text-align:center;min-height:1px;margin-top:8px}
+.opts{display:grid;gap:10px}.opt{text-align:left;background:#1a1a36;border:3px solid #000;box-shadow:3px 3px 0 #000;padding:14px 16px;min-height:56px}
+.opt.sel{background:#3a3a6e;outline:3px solid var(--y)}
+.right{background:#14532d!important;outline:3px solid #4ade80!important}.wrong{background:#5c1324!important;outline:3px solid #ff4d6d!important}.miss{outline:3px dashed #4ade80!important}
+.fix{display:inline-block;color:#86efac;font-size:15px;margin-left:8px}
+.bank{display:flex;flex-wrap:wrap;gap:10px;padding:12px;background:#0d0d1d;border:3px dashed #3a3a6e;min-height:66px}
+.chip{background:#f4f1e8;color:#111;border:3px solid #000;box-shadow:3px 3px 0 #000;padding:10px 12px;font-size:17px;font-weight:600;min-height:48px;text-align:left}
+.chip.sel{background:var(--y);transform:translate(-2px,-2px);box-shadow:5px 5px 0 #000}
+.chip.right,.chip.wrong{color:#fff}
+.gaptext{line-height:2.6;font-size:19px}
+.slot{display:inline-flex;align-items:center;vertical-align:middle;background:#0d0d1d;border:3px dashed var(--y);min-width:150px;min-height:48px;padding:2px;cursor:pointer}
+.slot .chip{box-shadow:none;margin:0;width:100%}.slot.blk{display:flex;flex:1}
+.mrows{display:grid;gap:10px;margin:12px 0}.mrow{display:flex;gap:12px;align-items:stretch}
+.ml{flex:0 0 38%;background:#1a1a36;border:3px solid #000;padding:10px 12px;display:flex;align-items:center;font-weight:600}
+.ml.num{flex:0 0 64px;justify-content:center}.badge{background:var(--y);color:#111;border:3px solid #000;border-radius:50%;width:38px;height:38px;display:grid;place-items:center;font-family:"Press Start 2P";font-size:12px}
+.mini{width:100%}.mini svg{width:100%;display:block;border:2px solid #000}
+.diawrap{background:#000;border:4px solid #000;box-shadow:var(--sh);margin-bottom:10px}.dia{width:100%;display:block}
+.cats{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:10px;margin-bottom:6px}
+.catcol{background:#1a1a36;border:3px solid #000;min-height:150px;display:flex;flex-direction:column;cursor:pointer}
+.cath{background:var(--c);color:#111;font-weight:600;padding:8px;text-align:center;border-bottom:3px solid #000}
+.catbody{display:flex;flex-direction:column;gap:8px;padding:8px;flex:1}.catbody .chip{font-size:15px}
+.tfr{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#1a1a36;border:3px solid #000;padding:10px 12px;margin-bottom:8px}.tfr>span:first-child{flex:1;min-width:200px}
+.tfb button{width:56px;height:48px;border:3px solid #000;background:#3a3a6e;font-family:"Press Start 2P";font-size:13px;margin-left:6px}.tfb button.sel{background:var(--y);color:#111}
+.sortl{list-style:none;padding:0;display:grid;gap:10px}.sortl li{display:flex;gap:10px;align-items:center;background:#1a1a36;border:3px solid #000;padding:10px}
+.sn{font-family:"Press Start 2P";font-size:12px;color:var(--y);width:28px}.stx{flex:1}.sb{display:flex;flex-direction:column;gap:6px}
+.sb button{width:52px;height:40px;background:#3a3a6e;border:3px solid #000}.sb button:disabled{opacity:.3}
+.atl .tfb button{width:auto;min-width:92px;padding:0 10px;font-size:11px}.atl textarea{min-height:80px}.model{background:#0d0d1d;border:3px solid #3a3a6e;padding:14px;margin-top:12px}.model hr{border:0;border-top:2px dashed #3a3a6e}
+.tag{display:inline-block;padding:2px 8px;margin:3px 2px;border:2px solid #000;font-size:15px}.tag.ok{background:#14532d}.tag.no{background:#3a3a6e;opacity:.8}
+.fb{margin-top:18px;border:4px solid #000;padding:16px;text-align:center}.fb.good{background:#14532d}.fb.mid{background:#5a4a0a}.fb.low{background:#5c1324}
+.fbh{font-size:16px;color:var(--y)}.fbh span{display:block;font-family:"Pixelify Sans";font-size:17px;color:#fff;margin-top:8px}
+.gain{font-family:"Press Start 2P";font-size:16px;margin:12px 0;color:var(--y)}.gain .coin{width:26px;height:26px}.ex{text-align:left;background:#00000040;padding:10px;margin:8px 0}
+.modal{position:fixed;inset:0;background:#000b;display:grid;place-items:center;z-index:20;padding:16px}.modal .panel{max-width:440px;width:100%;text-align:center;animation:pop .3s}
+.bigico{font-size:64px}.rk{font-family:"Press Start 2P";font-size:15px;color:var(--y);line-height:1.6}
+@keyframes pop{from{transform:scale(.6)}to{transform:scale(1)}}
+.rain{position:fixed;top:40%;z-index:30;animation:rain 1.4s ease-out forwards;pointer-events:none}.rain .coin{width:34px;height:34px}
+@keyframes rain{0%{transform:translateY(0) scale(.5);opacity:0}20%{opacity:1}100%{transform:translateY(-55vh) scale(1.2);opacity:0}}
+@media(max-width:640px){body{font-size:17px}.pix.big{font-size:44px}.node{width:100%}.ml{flex-basis:44%}.cats{grid-template-columns:1fr}.q{font-size:19px}.hbtn{font-size:8px}}
+</style></head><body><div id="app"></div>
+<script>
+// ===== SCHAUBILDER (eigene Zeichnungen) =====
+const M=(n,x,y)=>`<g class="mk"><circle cx="${x}" cy="${y}" r="12" fill="#ffd400" stroke="#111" stroke-width="3"/><text x="${x}" y="${y+5}" text-anchor="middle" font-size="14" font-weight="bold" fill="#111" font-family="monospace">${n}</text></g>`;
+const L=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#111" stroke-width="2.5" stroke-dasharray="5 3"/>`;
+const ARR=`<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#111"/></marker><marker id="ahw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#fff"/></marker></defs>`;
+const semi=(cx,cy,r,f)=>`<path d="M${cx-r},${cy} A${r},${r} 0 0 1 ${cx+r},${cy} Z" fill="${f}" stroke="#111" stroke-width="2"/>`;
+const svg=(vb,inner)=>`<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg" class="dia">${ARR}${inner}</svg>`;
+
+const SVG={
+schalen: svg("0 0 420 255",`<rect width="420" height="255" fill="#20203a"/>
+${semi(210,248,230,"#8d6e63")}${semi(210,248,221,"#f4a460")}${semi(210,248,200,"#d2691e")}${semi(210,248,120,"#ffb300")}${semi(210,248,45,"#fff176")}
+<line x1="0" y1="248" x2="420" y2="248" stroke="#111" stroke-width="3"/>
+${L(42,38,50,86)}${M(1,36,30)}${L(376,36,318,66)}${M(2,384,30)}${M(3,150,110)}${M(4,245,180)}${M(5,210,228)}`),
+
+beben: svg("0 0 420 250",`<rect width="420" height="250" fill="#bfe3ff"/><clipPath id="gc"><polygon points="0,70 250,70 250,46 420,46 420,250 0,250"/></clipPath>
+<polygon points="0,70 250,70 190,250 0,250" fill="#a1887f" stroke="#111" stroke-width="2"/><polygon points="250,46 420,46 420,250 190,250 250,70" fill="#8d6e63" stroke="#111" stroke-width="2"/>
+<rect x="0" y="64" width="250" height="6" fill="#6abf4b"/><rect x="250" y="40" width="170" height="6" fill="#6abf4b"/>
+<g clip-path="url(#gc)" fill="none" stroke="#d32f2f" stroke-width="2.5" stroke-dasharray="6 4"><circle cx="215" cy="175" r="30"/><circle cx="215" cy="175" r="60"/><circle cx="215" cy="175" r="90"/><circle cx="215" cy="175" r="120"/></g>
+<line x1="215" y1="175" x2="215" y2="70" stroke="#111" stroke-width="2" stroke-dasharray="2 4"/>
+<polygon points="215,163 219,171 228,172 221,178 223,187 215,182 207,187 209,178 202,172 211,171" fill="#ff1744" stroke="#111" stroke-width="1.5"/><circle cx="215" cy="69" r="6" fill="#ff1744" stroke="#111" stroke-width="2"/>
+${L(128,205,206,180)}${M(1,118,210)}${L(215,38,215,62)}${M(2,215,26)}${L(320,140,288,150)}${M(3,332,136)}${L(290,30,256,58)}${M(4,300,22)}`),
+
+mobil: svg("0 0 420 220",`<rect width="420" height="220" fill="#bfe3ff"/><rect y="118" width="420" height="102" fill="#9c7bb0" stroke="#111" stroke-width="2"/>
+<rect x="150" y="100" width="120" height="18" fill="#2f7fd8"/>
+<polygon points="20,88 150,88 150,158 20,158" fill="#e8c98e" stroke="#111" stroke-width="2"/>
+<polygon points="270,88 400,88 400,158 270,158" fill="#e8c98e" stroke="#111" stroke-width="2"/>
+<polygon points="270,88 285,62 300,80 312,58 330,88" fill="#a1887f" stroke="#111" stroke-width="2"/>
+<line x1="380" y1="74" x2="345" y2="74" stroke="#111" stroke-width="4" marker-end="url(#ah)"/>
+${M(1,85,124)}${M(2,210,175)}${M(3,210,109)}${L(300,38,300,66)}${M(4,300,28)}`),
+
+div: svg("0 0 200 120",`<rect width="200" height="120" fill="#bfe3ff"/><rect y="10" width="200" height="110" fill="#2f7fd8"/><polygon points="0,104 85,58 115,58 200,104 200,120 0,120" fill="#f4a460"/>
+<polygon points="93,34 107,34 115,58 150,120 50,120 85,58" fill="#e53935"/>
+<polygon points="0,78 90,31 93,34 85,58 0,104" fill="#6d4c41" stroke="#111" stroke-width="2"/><polygon points="200,78 110,31 107,34 115,58 200,104" fill="#6d4c41" stroke="#111" stroke-width="2"/>
+<line x1="100" y1="112" x2="100" y2="70" stroke="#ffd400" stroke-width="3" marker-end="url(#ah)"/>
+<line x1="70" y1="36" x2="25" y2="58" stroke="#fff" stroke-width="4" marker-end="url(#ahw)"/><line x1="130" y1="36" x2="175" y2="58" stroke="#fff" stroke-width="4" marker-end="url(#ahw)"/>`),
+
+konv: svg("0 -14 200 134",`<rect y="-14" width="200" height="134" fill="#bfe3ff"/><rect y="22" width="140" height="45" fill="#2f7fd8"/><rect y="62" width="200" height="58" fill="#f4a460"/>
+<polygon points="0,45 108,45 175,120 150,120 100,62 0,62" fill="#6d4c41" stroke="#111" stroke-width="2"/>
+<polygon points="106,16 200,16 200,72 128,72 118,56 110,46" fill="#c8a26b" stroke="#111" stroke-width="2"/><polygon points="138,16 152,3 166,16" fill="#795548" stroke="#111" stroke-width="2"/>
+<path d="M158,98 L152,8" stroke="#e53935" stroke-width="4"/><circle cx="152" cy="5" r="4" fill="#e53935"/>
+<line x1="20" y1="36" x2="70" y2="36" stroke="#fff" stroke-width="4" marker-end="url(#ahw)"/>`),
+
+trans: svg("0 0 200 120",`<polygon points="0,0 200,0 200,58 188,52 176,63 163,55 150,66 139,54 126,62 112,51 100,64 88,55 75,66 62,53 50,62 37,52 24,64 12,55 0,61" fill="#a1887f" stroke="#111" stroke-width="2.5"/>
+<polygon points="0,120 200,120 200,58 188,52 176,63 163,55 150,66 139,54 126,62 112,51 100,64 88,55 75,66 62,53 50,62 37,52 24,64 12,55 0,61" fill="#c8a26b" stroke="#111" stroke-width="2.5"/>
+<g stroke="#6d5440" stroke-width="1.5" fill="none"><polyline points="15,14 40,10 60,16"/><polyline points="120,10 150,15 175,9"/><polyline points="30,40 55,36"/><polyline points="150,38 178,34"/><polyline points="20,84 50,80 75,86"/><polyline points="125,82 160,78"/><polyline points="60,100 95,96"/></g>
+<g stroke="#111" stroke-width="1.5"><line x1="112" y1="51" x2="116" y2="43"/><line x1="75" y1="66" x2="71" y2="74"/><line x1="150" y1="66" x2="154" y2="74"/><line x1="37" y1="52" x2="40" y2="44"/></g>
+<line x1="140" y1="28" x2="60" y2="28" stroke="#111" stroke-width="5" marker-end="url(#ah)"/><line x1="60" y1="92" x2="140" y2="92" stroke="#111" stroke-width="5" marker-end="url(#ah)"/>
+<text x="100" y="116" text-anchor="middle" font-size="11" font-family="monospace" fill="#111">Ansicht von oben</text>`),
+
+subd: svg("0 0 420 250",`<rect width="420" height="250" fill="#bfe3ff"/><rect y="55" width="270" height="55" fill="#2f7fd8"/><rect y="100" width="420" height="150" fill="#f4a460"/>
+<polygon points="0,82 228,82 338,240 306,248 205,102 0,102" fill="#6d4c41" stroke="#111" stroke-width="2"/>
+<polygon points="236,48 420,48 420,125 285,125 256,100 246,80" fill="#c8a26b" stroke="#111" stroke-width="2"/>
+<polygon points="318,48 345,12 372,48" fill="#795548" stroke="#111" stroke-width="2"/>
+<path d="M300,172 C335,140 340,100 345,16" stroke="#e53935" stroke-width="5" fill="none"/><ellipse cx="300" cy="175" rx="22" ry="12" fill="#e53935" stroke="#111" stroke-width="2"/>
+<line x1="60" y1="70" x2="130" y2="70" stroke="#fff" stroke-width="4" marker-end="url(#ahw)"/><line x1="410" y1="64" x2="385" y2="64" stroke="#111" stroke-width="4" marker-end="url(#ah)"/>
+${M(1,170,93)}${M(2,390,100)}${L(205,32,234,88)}${M(3,198,24)}${L(388,18,352,22)}${M(4,398,14)}${M(5,262,178)}${M(6,80,200)}`),
+
+diverg: svg("0 0 420 240",`<rect width="420" height="240" fill="#bfe3ff"/><rect y="25" width="420" height="215" fill="#2f7fd8"/><polygon points="0,210 190,125 230,125 420,210 420,240 0,240" fill="#f4a460"/>
+<polygon points="203,78 217,78 230,125 310,240 110,240 190,125" fill="#e53935"/>
+<polygon points="0,150 196,74 203,78 190,125 0,210" fill="#6d4c41" stroke="#111" stroke-width="2"/><polygon points="420,150 224,74 217,78 230,125 420,210" fill="#6d4c41" stroke="#111" stroke-width="2"/>
+<polygon points="184,79 196,74 203,78 190,125 177,130" fill="#3e2723"/><polygon points="236,79 224,74 217,78 230,125 243,130" fill="#3e2723"/>
+<line x1="185" y1="225" x2="198" y2="150" stroke="#ffd400" stroke-width="4" marker-end="url(#ah)"/><line x1="235" y1="225" x2="222" y2="150" stroke="#ffd400" stroke-width="4" marker-end="url(#ah)"/>
+<line x1="160" y1="72" x2="80" y2="103" stroke="#fff" stroke-width="5" marker-end="url(#ahw)"/><line x1="260" y1="72" x2="340" y2="103" stroke="#fff" stroke-width="5" marker-end="url(#ahw)"/>
+<text x="22" y="172" font-size="13" font-family="monospace" fill="#fff">Lithosphäre</text>
+${L(210,24,210,72)}${M(1,210,14)}${M(2,210,200)}${L(148,50,188,92)}${M(3,138,44)}${M(4,58,104)}${M(5,370,222)}`),
+
+iso: svg("0 0 420 240",`<rect width="420" height="240" fill="#bfe3ff"/><rect y="60" width="420" height="180" fill="#f4a460" stroke="#111" stroke-width="2"/>
+<rect y="60" width="420" height="50" fill="#c8a26b" stroke="#111" stroke-width="2"/>
+<polygon points="105,61 122,52 136,55 152,37 164,42 180,24 192,28 210,8 224,21 234,15 248,33 260,29 274,46 288,44 302,56 318,61" fill="#c8a26b" stroke="#111" stroke-width="2"/>
+<polygon points="105,109 118,121 132,119 146,138 160,143 170,166 186,174 198,195 212,203 224,190 236,179 250,170 258,151 272,143 284,126 300,121 318,109" fill="#c8a26b" stroke="#111" stroke-width="2"/>
+<rect x="106" y="58" width="211" height="53" fill="#c8a26b"/>
+<polygon points="200,22 210,8 224,21 217,25 209,22 204,26" fill="#fff"/><polygon points="173,31 180,24 192,28 186,33" fill="#fff"/><polygon points="229,19 234,15 241,24 235,23" fill="#fff"/>
+<g stroke="#8a6a3e" stroke-width="2" fill="none"><polyline points="150,52 172,46 190,50"/><polyline points="230,40 252,44 266,52"/><polyline points="140,80 175,74 205,82 240,76 280,84"/><polyline points="20,88 70,84 100,90"/><polyline points="330,92 370,86 410,90"/><polyline points="150,128 180,124 215,132 255,126"/><polyline points="180,160 210,154 240,162"/></g>
+${M(1,210,45)}${M(2,210,150)}${M(3,60,85)}${M(4,360,190)}`),
+
+antrieb: svg("0 0 440 260",`<rect width="440" height="260" fill="#bfe3ff"/><rect y="90" width="440" height="170" fill="#f4a460"/><rect y="40" width="310" height="55" fill="#2f7fd8"/>
+<path d="M90,165 C60,230 300,240 330,170" fill="none" stroke="#c62828" stroke-width="5" marker-end="url(#ah)"/><path d="M330,170 C300,120 100,120 90,165" fill="none" stroke="#c62828" stroke-width="5" stroke-dasharray="8 5"/>
+<polygon points="0,96 90,80 90,98 0,112" fill="#6d4c41" stroke="#111" stroke-width="2"/>
+<polygon points="90,80 300,94 395,250 360,256 285,128 90,98" fill="#6d4c41" stroke="#111" stroke-width="2"/>
+<polygon points="310,62 440,62 440,130 330,130" fill="#c8a26b" stroke="#111" stroke-width="2"/>
+<line x1="110" y1="74" x2="170" y2="78" stroke="#fff" stroke-width="5" marker-end="url(#ahw)"/>
+<line x1="320" y1="150" x2="352" y2="205" stroke="#fff" stroke-width="5" marker-end="url(#ahw)"/>
+<line x1="420" y1="78" x2="345" y2="78" stroke="#111" stroke-width="5" marker-end="url(#ah)"/>
+${L(90,30,90,76)}${M(1,90,20)}${M(2,180,112)}${L(285,28,303,92)}${M(3,280,20)}${M(4,395,200)}${M(5,410,100)}${M(6,200,200)}`),
+
+schicht: svg("0 0 420 260",`<rect width="420" height="260" fill="#bfe3ff"/><rect y="200" width="420" height="60" fill="#8d6e63" stroke="#111" stroke-width="2"/>
+<ellipse cx="210" cy="28" rx="55" ry="18" fill="#9e9e9e"/><ellipse cx="240" cy="18" rx="35" ry="12" fill="#bdbdbd"/>
+<polygon points="60,200 185,50 235,50 360,200" fill="#9e9e9e" stroke="#111" stroke-width="2"/><polygon points="90,200 190,72 230,72 330,200" fill="#5d4037"/><polygon points="120,200 195,94 225,94 300,200" fill="#9e9e9e"/><polygon points="150,200 200,116 220,116 270,200" fill="#5d4037"/>
+<polygon points="185,50 200,64 220,64 235,50" fill="#bfe3ff"/>
+<path d="M210,150 L292,116" stroke="#e53935" stroke-width="7"/><rect x="203" y="62" width="14" height="168" fill="#e53935"/><ellipse cx="210" cy="232" rx="62" ry="20" fill="#e53935" stroke="#111" stroke-width="2"/>
+<polygon points="284,112 296,108 300,118" fill="#e53935"/>
+${L(250,30,215,58)}${M(1,262,26)}${M(2,210,180)}${M(3,140,236)}${L(322,100,294,114)}${M(4,334,95)}${M(5,112,185)}`),
+
+hotspot: svg("0 0 440 250",`<rect width="440" height="250" fill="#bfe3ff"/><rect y="40" width="440" height="60" fill="#2f7fd8"/><rect y="140" width="440" height="110" fill="#f4a460"/>
+<rect y="100" width="440" height="40" fill="#8d6e63" stroke="#111" stroke-width="2"/>
+<path d="M310,250 C305,200 300,170 290,145 L370,145 C360,170 355,200 350,250 Z" fill="#e53935" stroke="#111" stroke-width="2"/>
+<rect x="325" y="45" width="10" height="100" fill="#e53935"/>
+<polygon points="280,101 330,28 380,101" fill="#5d4037" stroke="#111" stroke-width="2"/><polygon points="320,42 330,28 340,42" fill="#e53935"/>
+<polygon points="185,101 230,52 275,101" fill="#6d4c41" stroke="#111" stroke-width="2"/><polygon points="100,101 140,72 180,101" fill="#795548" stroke="#111" stroke-width="2"/>
+<line x1="110" y1="120" x2="30" y2="120" stroke="#fff" stroke-width="6" marker-end="url(#ahw)"/>
+${M(1,330,210)}${L(396,26,342,38)}${M(2,406,22)}${L(230,22,230,50)}${M(3,230,14)}${M(4,135,120)}${M(5,140,86)}`),
+
+tsunami: svg("0 0 440 230",`<rect width="440" height="230" fill="#bfe3ff"/>
+<path d="M0,100 L40,100 Q90,90 140,100 Q190,110 240,100 L290,100 Q320,40 345,58 Q355,80 380,100 L380,118 L300,200 L0,200 Z" fill="#2f7fd8" stroke="#111" stroke-width="2"/>
+<polygon points="0,200 300,200 380,118 440,98 440,230 0,230" fill="#8d6e63" stroke="#111" stroke-width="2"/>
+<polygon points="120,188 124,196 133,197 126,203 128,212 120,207 112,212 114,203 107,197 116,196" fill="#ff1744" stroke="#111" stroke-width="1.5"/>
+${L(68,172,113,198)}${M(1,60,166)}${L(140,66,140,92)}${M(2,140,56)}${L(320,24,333,46)}${M(3,312,18)}${M(4,370,170)}`)
+};
+
+// ===== WELTEN & AUFGABEN =====
+const WORLDS=[
+{title:"Reise ins Erdinnere",sub:"Erdbeben & Schalenbau der Erde",icon:"🌍",color:"#ff9f1c",tasks:[
+{type:"mc",q:"Wie entstehen Erdbeben?",options:["Spannungen zwischen Gesteinen werden zu groß, das Gestein bricht oder gleitet ruckartig","Der Erdkern dreht sich plötzlich schneller","Starker Regen weicht den Boden auf","Der Mond zieht die Erdkruste nach oben"],answer:0,explain:"Erdbeben sind meist Folge tektonischer Spannungen: Gesteine verhaken sich, die Spannung baut sich auf und löst sich ruckartig."},
+{type:"match",q:"Ordne jedem Begriff die richtige Erklärung zu.",pairs:[["Hypozentrum","Erdbebenherd im Erdinneren"],["Epizentrum","Ort an der Oberfläche direkt über dem Herd"],["Seismograph","zeichnet die Erdbebenwellen auf"],["Magnitude (Richterskala)","Stärke, berechnet aus dem Ausschlag im Seismogramm"],["Mercalliskala (I–XII)","beschreibt die Auswirkungen und Schäden"]],explain:"Am Epizentrum sind die Zerstörungen meist am stärksten."},
+{type:"label",q:"Beschrifte den Schalenbau der Erde (Kruste nicht maßstabsgetreu).",svg:"schalen",labels:["Erdkruste","oberer Erdmantel","unterer Erdmantel","äußerer Erdkern","innerer Erdkern"],extras:["Asthenosphärenkern"]},
+{type:"match",q:"Ordne jeder Schale ihr Merkmal zu.",pairs:[["Kontinentale Kruste","Granit, meist 20–40 km mächtig"],["Ozeanische Kruste","Basalt, nur ca. 5–8 km mächtig"],["Asthenosphäre","plastisch, die Platten gleiten darauf"],["Unterer Erdmantel","reicht bis ca. 2900 km Tiefe"],["Äußerer Erdkern","flüssig (Eisen, Nickel), erzeugt das Magnetfeld"],["Innerer Erdkern","fest wegen extrem hohem Druck, ca. 6000 °C"]]},
+{type:"mc",q:"Was passiert mit Temperatur, Druck und Dichte auf dem Weg zum Erdmittelpunkt?",options:["Alle drei nehmen zu","Alle drei nehmen ab","Die Temperatur steigt, Druck und Dichte sinken","Nur der Druck steigt, der Rest bleibt gleich"],answer:0,explain:"Im inneren Kern: ca. 6000 °C, ca. 3600 Kilobar und eine Dichte von ca. 13,5 g/cm³."},
+{type:"mc",q:"Klopapier-Modell: 1 Blatt = 100 km. Bei welchem Blatt liegt die Grenze zwischen Erdmantel und Erdkern?",options:["Blatt 6","Blatt 29","Blatt 51","Blatt 64"],answer:1,explain:"Nach 29 Blättern (2900 km) beginnt der Kern, bei Blatt 51 der innere Kern, bei Blatt 64 ist der Erdmittelpunkt erreicht. Die Kruste ist dünner als ein Blatt!"},
+{type:"mc",q:"Modellkritik: Wo hinkt das Rocher als Modell für die Erde am meisten?",options:["Die Schichtdicken stimmen nicht und es zeigt nicht die Zustände (z. B. flüssiger äußerer Kern, plastische Asthenosphäre)","Die Erde hat in Wirklichkeit gar keine Schichten","Die Erde ist innen hohl","Beim Rocher ist der Kern außen"],answer:0,explain:"Die Idee der Schalen passt, aber Mächtigkeiten, Materialien und Zustände (fest, plastisch, flüssig) stimmen nicht."},
+
+]},
+{title:"Konferenz 1912",sub:"Wegeners Kontinentalverschiebung",icon:"🧭",color:"#2ec4ff",tasks:[
+{type:"mc",q:"Welchen Beruf hatte Alfred Wegener (1880–1930)?",options:["Meteorologe und Polarforscher","Geologe und Bergmann","Astronaut","Vulkanologe"],answer:0,explain:"Gerade weil er kein Geologe war, nahmen viele Fachleute seine Theorie 1912 nicht ernst."},
+{type:"cat",q:"Konferenz 1912: Wer vertritt welche Aussage?",cats:["Mobilisten (Wegener)","Kontraktionisten","Expandisten"],items:[["Kontinente bewegen sich horizontal",0],["Kontinente aus Sial pflügen durch Sima",0],["Anden als „Bugwelle“ des driftenden Amerikas",0],["Die Erde kühlt ab und schrumpft",1],["Gebirge wie Runzeln eines vertrocknenden Apfels",1],["Parallele Küsten durch eingebrochene Landbrücken",1],["Die Erde dehnt sich durch radioaktiven Zerfall aus",2],["Ozeane sind Klüfte, die immer größer werden",2]]},
+{type:"match",q:"Jede Theorie hatte ein Problem. Ordne zu.",pairs:[["Mobilisten","kein überzeugender Antrieb (Gezeiten und Zentrifugalkraft zu schwach)"],["Kontraktionisten","keine Erklärung für Gräben und Ozeanbecken"],["Expandisten","keine Erklärung für die Gebirgsbildung"]]},
+{type:"multi",q:"Welche Indizien nannte Wegener für den Urkontinent Pangäa? (Mehrere richtig!)",options:["Küstenparallelität von Südamerika und Afrika","Fossilien des Glossopteris-Farns auf allen Südkontinenten","Fossilien des Mesosaurus in Afrika und Südamerika","Moränen und Gletscherschliffe auf heute weit getrennten Südkontinenten","Gleich alte Gesteine und Gebirge in Brasilien und Westafrika","Magnetische Streifen am Meeresboden","Satellitenmessungen der Plattenbewegung"],answers:[0,1,2,3,4],explain:"Magnetstreifen und Satellitenmessungen kamen erst ab den 1960er-Jahren dazu – sie führten später zur Theorie der Plattentektonik."},
+{type:"sort",q:"Bringe die Phasen der Kontinentverschiebung in die richtige Reihenfolge (oben = am ältesten).",items:["Pangäa: Alle Landmassen bilden einen Superkontinent, umgeben vom Riesenozean Panthalassa.","Pangäa zerreißt: Der Zentralatlantik öffnet sich, Laurasia (Norden) und Gondwana (Süden) entstehen.","Der Südatlantik öffnet sich: Südamerika trennt sich von Afrika, Indien driftet zum Äquator.","Indien ist mit Eurasien kollidiert, Nord- und Südamerika sind verbunden, Antarktika liegt am Südpol.","Heute: Der Atlantik ist größer, das Rote Meer hat sich geöffnet, Arabien ist mit Vorderasien kollidiert."]},
+{type:"gap",q:"Fülle die Lücken zu Wegeners Theorie.",text:"Alfred Wegener stellte {1912} seine Theorie vor. Danach gab es einen Urkontinent namens {Pangäa}, der vor ca. {200} Mio. Jahren zerbrach. Die leichten Kontinente aus {Sial} (Silizium + Aluminium) sollten durch eine dichtere Schicht aus {Sima} (Silizium + Magnesium) pflügen – wie {Eisberge} durch Packeis. Gebirge wie die Anden waren für ihn „{Bugwellen}“ der driftenden Kontinente. Weil sich die Kontinente horizontal bewegen, gehört seine Theorie zum {Mobilismus}.",extras:["Fixismus","1960","Gondwana"]},
+{type:"label",q:"Beschrifte Wegeners Modellvorstellung (Mobilisten).",svg:"mobil",labels:["Kontinent aus Sial","Sima","Ozean","Gebirge als „Bugwelle“"],extras:["Erdkern"]},
+{type:"mc",q:"Warum sprechen Gletscherspuren in Südamerika, Südafrika, Indien, Australien und der Antarktis für Pangäa?",options:["Bei heutiger Lage der Kontinente hätte das Eis fast die ganze Südhalbkugel bedecken müssen – dafür reicht das Wasser der Erde nicht","Gletscher können über Ozeane wandern","Dort ist es heute überall kalt","Die Spuren stammen von Meteoriten"],answer:0,explain:"Liegen die Kontinente zusammen, reicht eine einzige Eiskappe aus."},
+{type:"mc",q:"In welche zwei großen Landmassen zerfiel Pangäa zuerst?",options:["Laurasia im Norden und Gondwana im Süden","Eurasien und Afrika","Panthalassa und Tethys","Amerika und Antarktika"],answer:0,explain:"Panthalassa war der Riesenozean, die Tethys ein Meer, das sich dazwischen bildete."},
+{type:"open",q:"Erkläre, warum Wegeners Theorie 1912 von den meisten Wissenschaftlern abgelehnt wurde.",keys:[["antrieb","mechanismus","motor","kraft","kräfte"],["zentrifugal","gezeiten","flieh"],["schwach"],["verform","pflüg","kaputt","zerstört"],["fixis","fest","nicht beweg"]],need:3,model:"Wegener konnte keinen überzeugenden Antriebsmechanismus für die Bewegung der Kontinente nennen. Gezeiten und Unterschiede der Zentrifugalkraft waren nach Berechnungen viel zu schwach. Außerdem hätte ein Pflügen der Kontinente durch die ozeanische Kruste sie bis zur Unkenntlichkeit verformt. Fast alle Geowissenschaftler waren damals Fixisten und hielten die Kontinente für unbeweglich."}
+]},
+{title:"Plattengrenzen",sub:"Was passiert, wo Platten aufeinandertreffen?",icon:"🧩",color:"#4ade80",tasks:[
+{type:"mc",q:"Manche Plattengrenzen liegen mitten im Ozean statt an Kontinenträndern. Warum?",options:["Es bewegen sich Lithosphärenplatten, nicht nur Kontinente","Die Karte ist falsch gezeichnet","Kontinente schwimmen auf dem Wasser","Plattengrenzen gibt es nur im Meer"],answer:0,explain:"Eine Platte ist ein Stück Lithosphäre (Kruste + oberster Mantel), das Kontinente und Ozeanboden tragen kann."},
+{type:"match",q:"Ordne die Fachbegriffe zu.",pairs:[["divergierend","Platten bewegen sich voneinander weg"],["konvergierend","Platten bewegen sich aufeinander zu"],["Transformstörung","Platten gleiten aneinander vorbei"],["konstruktiv","Lithosphäre wird neu gebildet"],["destruktiv","Lithosphäre wird vernichtet"],["konservativ","Lithosphäre wird weder gebildet noch zerstört"]]},
+{type:"match",q:"Welches Schaubild zeigt welche Plattengrenze?",pairs:[["@div","Divergenz (konstruktiv)"],["@konv","Konvergenz / Subduktion (destruktiv)"],["@trans","Transformstörung (konservativ)"]]},
+{type:"cat",q:"Ordne die Merkmale der richtigen Plattengrenze zu.",cats:["divergierend","konvergierend","Transformstörung"],items:[["Mittelozeanischer Rücken",0],["Sea Floor Spreading",0],["aufsteigendes Magma füllt die Spalte",0],["Subduktion",1],["Tiefseegraben",1],["abtauchende Platte schmilzt auf",1],["Platten verhaken sich und lösen sich ruckartig",2],["Verwerfungen an der Oberfläche",2],["heftigste Erdbeben",2]]},
+{type:"cat",q:"Raumbeispiele: Welche Plattengrenze findet man hier?",cats:["divergierend","konvergierend","Transformstörung"],items:[["Mittelatlantischer Rücken",0],["Island",0],["Anden (Südamerika)",1],["Vulkane in Neuseeland",1],["Pazifischer Feuerring",1],["San-Andreas-Verwerfung",2],["Erdbeben von San Francisco 1906",2]]},
+{type:"label",q:"Beschrifte die Subduktionszone.",svg:"subd",labels:["ozeanische Platte","kontinentale Platte","Tiefseegraben","Vulkan","Aufschmelzung / Magma","Asthenosphäre"],extras:["Mittelozeanischer Rücken"]},
+{type:"label",q:"Beschrifte die divergierende Plattengrenze.",svg:"diverg",labels:["Mittelozeanischer Rücken (Rift)","aufsteigendes Magma","neue ozeanische Kruste","Plattenbewegung","Asthenosphäre"],extras:["Tiefseegraben"]},
+{type:"gap",q:"Lückentext: Konvergierende Plattengrenzen.",text:"Bewegen sich eine ozeanische und eine kontinentale Platte aufeinander zu, taucht die {schwerere} ozeanische Platte unter die {leichtere} kontinentale Platte ab. Diesen Vorgang nennt man {Subduktion}. Durch Reibungswärme und die mit der Tiefe steigende Temperatur wird die abtauchende Platte {aufgeschmolzen}. Ein Teil der Schmelze steigt auf, so entstehen {Vulkane}. An der Nahtstelle bildet sich ein {Tiefseegraben}, und durch die gewaltigen Kräfte gibt es häufig {Erdbeben}.",extras:["Sea Floor Spreading","Verwerfung","Kollision"]},
+{type:"mc",q:"Was bedeutet „Sea Floor Spreading“?",options:["Ozeanbodenspreizung: Magma steigt in der Spalte auf, und der Ozeanboden wächst nach beiden Seiten","Der Meeresspiegel steigt an","Der Ozeanboden taucht unter einen Kontinent","Zwei Kontinente stoßen zusammen"],answer:0,explain:"Das neue Material wird dem Ozeanboden „angeschweißt“. Am Mittelatlantischen Rücken wächst Island so um ca. 2 cm pro Jahr."},
+{type:"open",q:"Erkläre, warum an Transformstörungen die heftigsten Erdbeben entstehen.",keys:[["verhak"],["reibung"],["spannung"],["ruckartig","plötzlich","schlagartig"],["vorbei","aneinander"]],need:3,model:"An Transformstörungen gleiten zwei Platten aneinander vorbei. Die Bewegung ist aber nicht gleichmäßig: Die harten Platten verhaken sich wegen der Reibung. Dabei bauen sich über lange Zeit große Spannungen auf, die sich dann ruckartig lösen – es entstehen heftige Erdbeben, z. B. an der San-Andreas-Verwerfung."}
+]},
+{title:"Gebirge & Motor",sub:"Kollision, Isostasie & Antrieb der Platten",icon:"⛰️",color:"#c084fc",tasks:[
+{type:"gap",q:"Lückentext: Kollision – wenn Kontinente zusammenstoßen.",text:"Die Kollision ist ein Sonderfall der {Konvergenz}: Zwei {kontinentale} Platten stoßen zusammen. Weil beide die gleiche {Dichte} haben, taucht keine richtig ab. Das Gestein weicht nach {oben} aus, wird gefaltet, überschoben und zu „Decken“ gestapelt. Es entsteht ein {Falten- und Deckengebirge}, oft begleitet von starken {Erdbeben}. Beispiele sind der Himalaya und die {Alpen}.",extras:["ozeanische","unten","Anden","Divergenz"]},
+{type:"mc",q:"Auf den Gipfeln von Himalaya und Alpen findet man versteinerte Meerestiere. Wie kommt das?",options:["Meeresablagerungen zwischen den Kontinenten wurden bei der Kollision gefaltet und hoch gehoben","Vögel haben sie dorthin getragen","Früher lag der Meeresspiegel 8000 m höher","Vulkane haben sie hinausgeschleudert"],answer:0,explain:"Die Sedimente des Ozeanbodens zwischen Indien und Eurasien wurden zum Hochgebirge aufgefaltet."},
+{type:"match",q:"Ordne die Dichte zu.",pairs:[["kontinentale Kruste","2,7 g/cm³"],["ozeanische Kruste","3,0 g/cm³"],["lithosphärischer Mantel","3,3 g/cm³"]]},
+{type:"match",q:"Ordne die Antriebskräfte der Plattentektonik zu.",pairs:[["Konvektionsströme","warmes Mantelmaterial steigt auf, kühles sinkt ab – Platten fahren „huckepack“ mit"],["Slab Pull (Plattenzug)","die dichte ozeanische Platte sinkt ab und zieht den Rest der Platte hinterher"],["Ridge Push (Rückendruck)","Platten rutschen vom aufgewölbten Rücken in Richtung tieferer Ozeanboden"],["Rinnensog (Trench Suction)","die obere Platte wird in Richtung Tiefseerinne gezogen"]]},
+{type:"label",q:"Beschrifte das Schaubild zum Plattenantrieb.",svg:"antrieb",labels:["Mittelozeanischer Rücken","Rückendruck (Ridge Push)","Tiefseerinne","Plattenzug (Slab Pull)","Rinnensog","Mantelkonvektion"],extras:["Hotspot"]},
+{type:"cat",q:"Werden die Platten aktiv bewegt oder passiv mitgenommen?",cats:["aktiv (Schwerkraft)","passiv (mitgeschleppt)"],items:[["Slab Pull: Platte sinkt durch ihr Eigengewicht",0],["Ridge Push: Platten rutschen vom Rücken herab",0],["„Motor der Plattentektonik“",0],["Konvektionsströme im Mantel",1],["Platten wie Passagiere „huckepack“",1],["horizontaler Fluss in der Asthenosphäre (Mantle Drag)",1]]},
+{type:"mc",q:"Was ist die grundlegende Ursache aller Plattenbewegungen?",options:["Temperatur- und damit Dichteunterschiede zwischen heißem Erdinneren und Erdoberfläche","Die Anziehungskraft des Mondes","Der Wind über den Ozeanen","Die Erdrotation allein"],answer:0,explain:"Wärmeres Material ist weniger dicht und steigt auf, kühleres ist dichter und sinkt ab."},
+
+]},
+{title:"Feuerberge & Wellen",sub:"Vulkanismus & Tsunamis",icon:"🌋",color:"#ff4d6d",tasks:[
+{type:"mc",q:"Was ist ein Hotspot?",options:["Ein ortsfester Magmaschlot, der Vulkanismus abseits von Plattengrenzen verursacht","Ein besonders heißer Sommer","Ein Vulkan direkt an einer Subduktionszone","Ein Erdbebenherd"],answer:0,explain:"Ein Manteldiapir (bis zu 150 km breit) bringt Magma aus dem Kern-Mantel-Grenzbereich nach oben."},
+{type:"sort",q:"Wie entsteht eine Inselkette wie Hawaii? Bringe die Schritte in die richtige Reihenfolge.",items:["Heißes Material steigt als Manteldiapir aus dem Kern-Mantel-Grenzbereich auf.","Über dem ortsfesten Hotspot dringt Magma durch die Platte, ein Vulkan entsteht.","Die Platte driftet weiter, der Vulkan wird vom Hotspot weggetragen und erlischt.","Über dem Hotspot entsteht ein neuer Vulkan.","So bildet sich nach und nach eine Inselkette."]},
+{type:"label",q:"Beschrifte das Schaubild zum Hotspot.",svg:"hotspot",labels:["Hotspot (Manteldiapir)","aktiver Vulkan","erloschene, ältere Vulkaninsel","Plattenbewegung","älteste, abgetragene Insel"],extras:["Tiefseegraben"]},
+{type:"gap",q:"Lückentext: Tsunamis.",text:"Tsunami bedeutet auf Japanisch Hafenwelle. Der häufigste Auslöser sind starke {Seebeben} mit einer Mindestmagnitude von 7 unter dem Ozeanboden. Ausgehend vom {Epizentrum} bilden sich riesige {Wellen}, die sich {kreisförmig} in alle Richtungen bewegen. Tsunamis erreichen bis zu {ca. 965 km/h}. Auf dem Meer sind sie kaum erkennbar: Die Wellenlänge ist riesig (100–500 km), aber sie sind nur knapp einen Meter hoch. An der Küste werden die Wellen am Meeresboden abgebremst. So verringert sich die {Wellenlänge} und die {Wellenhöhe} steigt auf bis über 30 m. Die heftigsten Tsunamis der letzten Jahre entstanden im {pazifischen} und {indischen} Ozean. Anzeichen sind starke Erdbeben und ein schneller Anstieg oder {Rückgang} des Wassers.",extras:["Hypozentrum","atlantischen","ca. 10 km/h"]},
+{type:"label",q:"Beschrifte das Schaubild zum Tsunami.",svg:"tsunami",labels:["Seebeben (Epizentrum)","flache, lange Welle (ca. 1 m hoch)","hohe Welle (bis über 30 m)","ansteigender Meeresboden bremst die Welle"],extras:["Magmakammer"]},
+{type:"open",q:"Erläutere, warum Tsunamis auf dem offenen Meer kaum auffallen, an der Küste aber riesig werden.",keys:[["wellenlänge"],["meter","niedrig","flach","klein"],["abgebremst","bremst","langsamer"],["meeresboden","flacher","boden"],["wellenhöhe","höher","hoch","türmt"]],need:4,model:"Auf dem offenen Meer haben Tsunamis eine riesige Wellenlänge von 100–500 km, sind aber nur knapp einen Meter hoch – deshalb fallen sie kaum auf. Nähern sie sich der Küste, wird das Wasser flacher und die Wellen werden am Meeresboden abgebremst. Dadurch verkürzt sich die Wellenlänge, und die Wellenhöhe steigt auf bis über 30 m."}
+]},
+{title:"Atlas-Expedition",sub:"Gefahren erkennen mit dem Atlas (S. 256)",icon:"🗺️",color:"#f472b6",tasks:[
+{type:"atlas",coins:12,q:"Atlasarbeit (S. 256, Karte 2 und 3): Ort 1 – Indonesien",place:"Indonesien",sol:{e:2,t:2,v:2},keys:["subduktion","abtauch","untertauch"],model:"Subduktionszone"},
+{type:"atlas",coins:12,q:"Atlasarbeit (S. 256, Karte 2 und 3): Ort 2 – Island",place:"Island",sol:{e:0,t:0,v:2},keys:["divergier","auseinander","spreiz","mittelozean"],model:"divergierende Plattengrenze"},
+{type:"atlas",coins:12,q:"Atlasarbeit (S. 256, Karte 2 und 3): Ort 3 – Türkei",place:"Türkei",sol:{e:1,t:0,v:1},keys:["konvergier","kollision","zusammenstoß","aufeinander"],model:"konvergierende Plattengrenze"},
+{type:"atlas",coins:12,q:"Atlasarbeit (S. 256, Karte 2 und 3): Ort 4 – Ostküste Australiens",place:"Ostküste Australiens",sol:{e:0,t:2,v:0},keys:["subduktion","abtauch","untertauch"],model:"konvergierende Subduktionszone im Meer vom Pazifik"}
+]}
+];
+
+const RANKS=[[0,"Steinchen"],[40,"Erdbeben-Lehrling"],[80,"Seismo-Scout"],[130,"Wegeners Assistent"],[200,"Platten-Puzzler"],[270,"Subduktions-Profi"],[340,"Vulkan-Expertin / Experte"],[410,"Meister/in der Plattentektonik"]];
+
+// ===== ENGINE =====
+const KEY="unruhigeErde_atlas_v1";
+const TEACHER_CODE="geo-lehrkraft";
+let S={name:"",best:{},att:{},sound:true,teacher:false};
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+WORLDS.forEach((w,i)=>w.tasks.forEach((t,j)=>t.id=`w${i+1}t${j+1}`));
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const norm=s=>String(s).toLowerCase().replace(/\s+/g," ").trim();
+const maxC=t=>t.coins||(t.type==="open"?15:10);
+const worldMax=w=>w.tasks.reduce((s,t)=>s+maxC(t),0);
+const worldCoins=w=>w.tasks.reduce((s,t)=>s+(S.best[t.id]||0),0);
+const total=()=>WORLDS.reduce((s,w)=>s+worldCoins(w),0);
+const totalMax=()=>WORLDS.reduce((s,w)=>s+worldMax(w),0);
+const rankIdx=c=>{let r=0;RANKS.forEach((x,i)=>{if(c>=x[0])r=i;});return r;};
+const unlocked=i=>i===0||S.teacher||worldCoins(WORLDS[i-1])>=Math.ceil(.6*worldMax(WORLDS[i-1]));
+const stars=w=>{const p=worldCoins(w)/worldMax(w);return p>=1?3:p>=.8?2:p>=.6?1:0;};
+const COIN=`<svg class="coin" viewBox="0 0 16 16"><rect x="4" y="1" width="8" height="14" fill="#b8860b"/><rect x="2" y="3" width="12" height="10" fill="#b8860b"/><rect x="5" y="2" width="6" height="12" fill="#ffd400"/><rect x="3" y="4" width="10" height="8" fill="#ffd400"/><rect x="7" y="4" width="2" height="8" fill="#b8860b"/></svg>`;
+const TYPE_NAMES={mc:"QUIZ",multi:"MEHRFACHWAHL",tf:"RICHTIG/FALSCH",gap:"LÜCKENTEXT",match:"ZUORDNEN",label:"SCHAUBILD BESCHRIFTEN",cat:"SORTIEREN",sort:"REIHENFOLGE",open:"ERKLÄREN",atlas:"ATLASARBEIT"};
+
+// Sound
+let AC=null;
+function beep(seq){if(!S.sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();let t=AC.currentTime;seq.forEach(([f,d])=>{const o=AC.createOscillator(),g=AC.createGain();o.type="square";o.frequency.value=f;g.gain.setValueAtTime(.06,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d);t+=d*.9;});}catch(e){}}
+const SFX={ok:()=>beep([[660,.08],[880,.08],[1320,.14]]),bad:()=>beep([[220,.15],[160,.2]]),tap:()=>beep([[520,.04]]),lvl:()=>beep([[523,.1],[659,.1],[784,.1],[1047,.25]])};
+
+function hud(){const c=total(),ri=rankIdx(c),next=RANKS[ri+1];const lo=RANKS[ri][0],hi=next?next[0]:totalMax();const p=next?Math.round((c-lo)/(hi-lo)*100):100;
+return `<header class="hud"><button class="hbtn" onclick="go('map')" aria-label="Karte">◀ KARTE</button><div class="hrank"><span class="lv">LV ${ri+1}</span> <b>${esc(RANKS[ri][1])}</b><div class="bar"><i style="width:${p}%"></i></div><small>${next?`noch ${hi-c} Münzen bis „${esc(next[1])}“`:"Höchster Rang erreicht!"}</small></div><div class="hcoins">${COIN}<b>${c}</b></div></header>`;}
+
+let VIEW="start",CUR=null;
+function go(v,a,b){VIEW=v;const app=$("#app");app.innerHTML="";window.scrollTo(0,0);
+ if(v==="start")return renderStart(app);
+ if(v==="map")return renderMap(app);
+ if(v==="world")return renderWorld(app,a);
+ if(v==="task")return renderTask(app,a,b);}
+
+function renderStart(app){app.innerHTML=`<div class="start"><div class="logo"><div class="pix">UNRUHIGE</div><div class="pix big">ERDE</div><div class="sub">DAS WIEDERHOLUNGS-SPIEL · GEOGRAFIE</div></div>
+<div class="panel"><p>Sammle Münzen, steige im Rang auf und schalte alle fünf Welten frei – von Erdbeben bis Tsunami.</p>
+<label class="lbl">Dein Spielername</label><input id="nm" maxlength="20" placeholder="z. B. Lava-Lea" value="${esc(S.name)}"><button class="btn big" id="go">▶ START</button>
+<p class="small">Dein Fortschritt wird nur auf diesem Gerät gespeichert.</p></div></div>`;
+ $("#go").onclick=()=>{S.name=$("#nm").value.trim();save();SFX.tap();go("map");};
+ $("#nm").onkeydown=e=>{if(e.key==="Enter")$("#go").click();};}
+
+function renderMap(app){let h=hud()+`<main class="map"><h1 class="pixh">${S.name?`HALLO, ${esc(S.name.toUpperCase())}!`:"WELTKARTE"}</h1><p class="center small">Schalte die nächste Welt frei, indem du 60 % der Münzen der vorherigen Welt sammelst.</p><div class="path">`;
+ WORLDS.forEach((w,i)=>{const u=unlocked(i),st=stars(w);h+=`<button class="node ${i%2?"r":"l"} ${u?"":"locked"}" style="--c:${w.color}" ${u?`onclick="go('world',${i})"`:""}>
+ <span class="ico">${u?w.icon:"🔒"}</span><span class="nt"><small>WELT ${i+1}</small><b>${esc(w.title)}</b><em>${esc(w.sub)}</em>
+ <span class="nm">${COIN} ${worldCoins(w)} / ${worldMax(w)} <span class="st">${"★".repeat(st)}${"☆".repeat(3-st)}</span></span>${u?"":`<em class="lk">Benötigt ${Math.ceil(.6*worldMax(WORLDS[i-1]))} Münzen in Welt ${i}</em>`}</span></button>`;});
+ h+=`</div><footer class="foot"><button class="lnk" onclick="toggleSound()">${S.sound?"🔊 Ton an":"🔇 Ton aus"}</button><button class="lnk" onclick="go('start')">✎ Name ändern</button><button class="lnk" onclick="askReset()">↺ Fortschritt löschen</button><button class="lnk" onclick="askTeacher()">🔑 Lehrkraft</button></footer></main>`;
+ app.innerHTML=h;}
+function toggleSound(){S.sound=!S.sound;save();go("map");}
+
+function modal(html){const m=document.createElement("div");m.className="modal";m.innerHTML=`<div class="panel">${html}</div>`;document.body.appendChild(m);return m;}
+function askReset(){const m=modal(`<h2 class="pixh">ACHTUNG</h2><p>Willst du wirklich alle Münzen und deinen Rang löschen?</p><div class="row"><button class="btn" id="n">Abbrechen</button><button class="btn red" id="y">Löschen</button></div>`);
+ m.querySelector("#n").onclick=()=>m.remove();m.querySelector("#y").onclick=()=>{S.best={};S.att={};save();m.remove();go("map");};}
+function askTeacher(){const m=modal(`<h2 class="pixh">LEHRKRAFT</h2><p>${S.teacher?"Alle Welten sind freigeschaltet.":"Code eingeben, um alle Welten freizuschalten:"}</p>${S.teacher?"":`<input id="tc" placeholder="Code">`}<div class="row"><button class="btn" id="n">Schließen</button><button class="btn" id="y">${S.teacher?"Sperre wieder an":"OK"}</button></div>`);
+ m.querySelector("#n").onclick=()=>m.remove();m.querySelector("#y").onclick=()=>{if(S.teacher)S.teacher=false;else if(norm(m.querySelector("#tc").value)===TEACHER_CODE)S.teacher=true;else{m.querySelector("p").textContent="Falscher Code.";return;}save();m.remove();go("map");};}
+
+function renderWorld(app,i){const w=WORLDS[i];let h=hud()+`<main class="world" style="--c:${w.color}"><div class="wh"><span class="ico">${w.icon}</span><div><small>WELT ${i+1}</small><h1 class="pixh">${esc(w.title.toUpperCase())}</h1><p>${esc(w.sub)}</p></div></div><div class="grid">`;
+ w.tasks.forEach((t,j)=>{const b=S.best[t.id]||0,m=maxC(t),done=b>=m;h+=`<button class="tile ${done?"done":b?"part":""}" onclick="go('task',${i},${j})"><span class="tn">${j+1}</span><span class="tt">${TYPE_NAMES[t.type]}</span><span class="tq">${esc(t.q)}</span><span class="tc">${COIN} ${b}/${m}${done?" ✓":""}</span></button>`;});
+ h+=`</div></main>`;app.innerHTML=h;}
+
+// ---- Aufgabentypen ----
+function chip(txt){const c=document.createElement("button");c.className="chip";c.type="button";c.textContent=txt;c.dataset.v=txt;return c;}
+function makeSlots(bank,slots,locked){let sel=null;
+ const clear=()=>{if(sel)sel.classList.remove("sel");sel=null;};
+ const toBank=c=>{bank.appendChild(c);};
+ bank.addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c||locked())return;SFX.tap();if(sel===c)return clear();clear();sel=c;c.classList.add("sel");});
+ slots.forEach(s=>s.addEventListener("click",e=>{if(locked())return;const cur=s.querySelector(".chip");
+  if(sel){SFX.tap();if(cur)toBank(cur);s.appendChild(sel);s.classList.add("filled");clear();}
+  else if(cur){SFX.tap();toBank(cur);s.classList.remove("filled");}}));
+}
+function slotCheck(slots){let ok=0;slots.forEach(s=>{const c=s.querySelector(".chip"),a=s.dataset.ans;const r=c&&norm(c.dataset.v)===norm(a);s.classList.add(r?"right":"wrong");if(r)ok++;else{const k=document.createElement("span");k.className="fix";k.textContent="→ "+a;s.after(k);}});return ok/slots.length;}
+
+const T={
+mc(t,el){let pick=null;const opts=shuffle(t.options.map((o,i)=>[o,i]));el.innerHTML=`<div class="opts">${opts.map(([o,i])=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join("")}</div>`;
+ el.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{if(el.dataset.lock)return;SFX.tap();el.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");pick=+b.dataset.i;});
+ return{ready:()=>pick!==null,check(){el.querySelectorAll(".opt").forEach(b=>{const i=+b.dataset.i;if(i===t.answer)b.classList.add("right");else if(i===pick)b.classList.add("wrong");});return pick===t.answer?1:0;}};},
+multi(t,el){const on=new Set();const opts=shuffle(t.options.map((o,i)=>[o,i]));el.innerHTML=`<p class="hint">Tippe alle richtigen Antworten an.</p><div class="opts">${opts.map(([o,i])=>`<button class="opt" data-i="${i}">☐ ${esc(o)}</button>`).join("")}</div>`;
+ el.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{if(el.dataset.lock)return;SFX.tap();const i=+b.dataset.i;if(on.has(i)){on.delete(i);b.classList.remove("sel");b.textContent="☐ "+t.options[i];}else{on.add(i);b.classList.add("sel");b.textContent="☑ "+t.options[i];}});
+ return{ready:()=>on.size>0,check(){let g=0,f=0;el.querySelectorAll(".opt").forEach(b=>{const i=+b.dataset.i,c=t.answers.includes(i);if(c){b.classList.add(on.has(i)?"right":"miss");if(on.has(i))g++;}else if(on.has(i)){b.classList.add("wrong");f++;}});return Math.max(0,(g-f)/t.answers.length);}};},
+tf(t,el){const v={};el.innerHTML=t.items.map((it,i)=>`<div class="tfr" data-i="${i}"><span>${esc(it[0])}</span><span class="tfb"><button data-v="1">R</button><button data-v="0">F</button></span></div>`).join("");
+ el.querySelectorAll(".tfr").forEach(r=>r.querySelectorAll("button").forEach(b=>b.onclick=()=>{if(el.dataset.lock)return;SFX.tap();r.querySelectorAll("button").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");v[r.dataset.i]=b.dataset.v==="1";}));
+ return{ready:()=>Object.keys(v).length===t.items.length,check(){let ok=0;el.querySelectorAll(".tfr").forEach(r=>{const i=r.dataset.i,c=v[i]===t.items[i][1];r.classList.add(c?"right":"wrong");if(c)ok++;else{const k=document.createElement("small");k.className="fix";k.textContent="→ "+(t.items[i][1]?"richtig":"falsch");r.appendChild(k);}});return ok/t.items.length;}};},
+gap(t,el){const parts=t.text.split(/\{([^}]+)\}/);const ans=[];let h='<div class="gaptext">';parts.forEach((p,i)=>{if(i%2){ans.push(p);h+=`<span class="slot inl" data-ans="${esc(p)}"></span>`;}else h+=esc(p);});h+='</div><p class="hint">Tippe ein Wort an und dann die Lücke.</p><div class="bank"></div>';el.innerHTML=h;
+ const bank=el.querySelector(".bank");shuffle(ans.concat(t.extras||[])).forEach(a=>bank.appendChild(chip(a)));const slots=[...el.querySelectorAll(".slot")];makeSlots(bank,slots,()=>el.dataset.lock);
+ return{ready:()=>slots.every(s=>s.querySelector(".chip")),check:()=>slotCheck(slots)};},
+match(t,el){const pairs=shuffle(t.pairs);let h='<div class="mrows">';pairs.forEach(([l,r])=>{const left=l.startsWith("@")?`<div class="mini">${SVG[l.slice(1)]}</div>`:esc(l);h+=`<div class="mrow"><div class="ml">${left}</div><div class="slot blk" data-ans="${esc(r)}"></div></div>`;});h+='</div><p class="hint">Tippe eine Karte an und dann das passende Feld.</p><div class="bank"></div>';el.innerHTML=h;
+ const bank=el.querySelector(".bank");shuffle(t.pairs.map(p=>p[1]).concat(t.extras||[])).forEach(a=>bank.appendChild(chip(a)));const slots=[...el.querySelectorAll(".slot")];makeSlots(bank,slots,()=>el.dataset.lock);
+ return{ready:()=>slots.every(s=>s.querySelector(".chip")),check:()=>slotCheck(slots)};},
+label(t,el){let h=`<div class="diawrap">${SVG[t.svg]}</div><div class="mrows">`;t.labels.forEach((a,i)=>{h+=`<div class="mrow"><div class="ml num"><span class="badge">${i+1}</span></div><div class="slot blk" data-ans="${esc(a)}"></div></div>`;});h+='</div><p class="hint">Tippe einen Begriff an und dann die passende Nummer.</p><div class="bank"></div>';el.innerHTML=h;
+ const bank=el.querySelector(".bank");shuffle(t.labels.concat(t.extras||[])).forEach(a=>bank.appendChild(chip(a)));const slots=[...el.querySelectorAll(".slot")];makeSlots(bank,slots,()=>el.dataset.lock);
+ return{ready:()=>slots.every(s=>s.querySelector(".chip")),check:()=>slotCheck(slots)};},
+cat(t,el){el.innerHTML=`<div class="cats" style="--n:${t.cats.length}">${t.cats.map((c,i)=>`<div class="catcol" data-c="${i}"><div class="cath">${esc(c)}</div><div class="catbody"></div></div>`).join("")}</div><p class="hint">Tippe eine Karte an und dann die passende Spalte.</p><div class="bank"></div>`;
+ const bank=el.querySelector(".bank");let sel=null;shuffle(t.items).forEach(([txt,c])=>{const k=chip(txt);k.dataset.c=c;bank.appendChild(k);});
+ const clear=()=>{if(sel)sel.classList.remove("sel");sel=null;};
+ el.addEventListener("click",e=>{if(el.dataset.lock)return;const k=e.target.closest(".chip"),col=e.target.closest(".catcol");
+  if(k&&!col){SFX.tap();if(sel===k)return clear();clear();sel=k;k.classList.add("sel");return;}
+  if(col){if(sel){SFX.tap();col.querySelector(".catbody").appendChild(sel);clear();}else if(k){SFX.tap();bank.appendChild(k);}}});
+ return{ready:()=>!bank.querySelector(".chip"),check(){let ok=0;el.querySelectorAll(".catcol .chip").forEach(k=>{const c=k.closest(".catcol").dataset.c===k.dataset.c;k.classList.add(c?"right":"wrong");if(c)ok++;else k.title="gehört zu: "+t.cats[k.dataset.c];if(!c){const s=document.createElement("small");s.className="fix";s.textContent=" → "+t.cats[k.dataset.c];k.appendChild(s);}});return ok/t.items.length;}};},
+sort(t,el){let order=shuffle(t.items.map((x,i)=>i));if(order.every((v,i)=>v===i))order.reverse();
+ const draw=()=>{el.innerHTML=`<ol class="sortl">${order.map((v,p)=>`<li data-v="${v}"><span class="sn">${p+1}</span><span class="stx">${esc(t.items[v])}</span><span class="sb"><button data-d="-1" ${p===0?"disabled":""}>▲</button><button data-d="1" ${p===order.length-1?"disabled":""}>▼</button></span></li>`).join("")}</ol>`;
+  el.querySelectorAll("li").forEach((li,p)=>li.querySelectorAll("button").forEach(b=>b.onclick=()=>{if(el.dataset.lock)return;SFX.tap();const q=p+ +b.dataset.d;[order[p],order[q]]=[order[q],order[p]];draw();}));};draw();
+ return{ready:()=>true,check(){let ok=0;el.querySelectorAll("li").forEach((li,p)=>{const c=+li.dataset.v===p;li.classList.add(c?"right":"wrong");if(c)ok++;else{const s=document.createElement("small");s.className="fix";s.textContent=`→ gehört an Platz ${+li.dataset.v+1}`;li.querySelector(".stx").appendChild(s);}});return ok/order.length;}};},
+atlas(t,el){const L3=["gering","mittel","hoch"],rows=[["Erdbebengefahr","e"],["Tsunamigefahr","t"],["Vulkanismus","v"]],v={};
+ el.innerHTML=`<div class="atl"><p class="hint">📖 Schlage im Atlas <b>Seite 256, Karte 2 und 3</b> auf und suche: <b>${esc(t.place)}</b></p>${rows.map(([n,k])=>`<div class="tfr" data-k="${k}"><span>${n}</span><span class="tfb">${L3.map((x,i)=>`<button data-v="${i}">${x}</button>`).join("")}</span></div>`).join("")}<label class="lbl">Erkläre kurz: Welche Plattengrenze bzw. welcher Vorgang steckt dahinter?</label><textarea id="ta" rows="3" placeholder="z. B. Art der Plattengrenze …"></textarea><div class="ores"></div></div>`;
+ const ta=el.querySelector("#ta");
+ el.querySelectorAll(".tfr").forEach(r=>r.querySelectorAll("button").forEach(b=>b.onclick=()=>{if(el.dataset.lock)return;SFX.tap();r.querySelectorAll("button").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");v[r.dataset.k]=+b.dataset.v;}));
+ return{ready:()=>Object.keys(v).length===3&&ta.value.trim().length>=6,notReady:"Wähle für alle drei Gefahren eine Stufe aus und schreibe eine kurze Erklärung.",check(){let ok=0;
+  el.querySelectorAll(".tfr").forEach(r=>{const k=r.dataset.k,c=v[k]===t.sol[k];r.classList.add(c?"right":"wrong");if(c)ok++;else{const f=document.createElement("small");f.className="fix";f.textContent="→ "+L3[t.sol[k]];r.appendChild(f);}});
+  const val=norm(ta.value);ta.readOnly=true;const hit=t.keys.some(k=>val.includes(k));
+  el.querySelector(".ores").innerHTML=`<div class="model"><b>${hit?"✓ Erklärung passt!":"Erklärung zum Vergleichen:"}</b><p>${esc(t.model)}</p></div>`;
+  return (ok+(hit?1:0))/4;}};},
+open(t,el){el.innerHTML=`<textarea id="ta" rows="7" placeholder="Schreibe hier deine Erklärung in ganzen Sätzen …"></textarea><p class="hint">Verwende die passenden Fachbegriffe! Danach siehst du eine Musterlösung.</p><div class="ores"></div>`;const ta=el.querySelector("#ta");
+ return{ready:()=>ta.value.trim().length>=40,notReady:"Schreib noch etwas mehr (mindestens zwei Sätze).",check(){const v=norm(ta.value);ta.readOnly=true;let f=0;const hit=[],miss=[];t.keys.forEach(g=>{if(g.some(k=>v.includes(k))){f++;hit.push(g[0]);}else miss.push(g[0]);});
+  el.querySelector(".ores").innerHTML=`<div class="model"><b>Fachbegriffe gefunden: ${f} von ${t.need} benötigten</b><br>${hit.map(x=>`<span class="tag ok">✓ ${esc(x)}…</span>`).join(" ")} ${miss.map(x=>`<span class="tag no">${esc(x)}…?</span>`).join(" ")}<hr><b>Musterlösung:</b><p>${esc(t.model)}</p><small>Vergleiche ehrlich: Hast du alles erklärt, was in der Musterlösung steht?</small></div>`;return Math.min(1,f/t.need);}};}
+};
+
+function renderTask(app,wi,ti){const w=WORLDS[wi],t=w.tasks[ti];CUR={wi,ti};const m=maxC(t),att=S.att[t.id]||0,best=S.best[t.id]||0;
+ app.innerHTML=hud()+`<main class="task" style="--c:${w.color}"><div class="tbar"><button class="hbtn" onclick="go('world',${wi})">◀ WELT ${wi+1}</button><span>AUFGABE ${ti+1}/${w.tasks.length}</span><span class="ttype">${TYPE_NAMES[t.type]}</span></div>
+ <div class="panel"><h2 class="q">${esc(t.q)}</h2><div class="info">${COIN} bis zu ${att?Math.round(m/2):m} Münzen${att?" (Wiederholung = halbe Münzen)":""} · bisher geholt: ${best}/${m}</div><div id="body"></div><div class="msg" id="msg"></div>
+ <div class="row"><button class="btn big" id="chk">PRÜFEN</button></div><div id="fb"></div></div></main>`;
+ const body=$("#body"),api=T[t.type](t,body);
+ $("#chk").onclick=()=>{if(!api.ready()){$("#msg").textContent=api.notReady||"Bearbeite zuerst alle Teile der Aufgabe.";SFX.bad();return;}
+  $("#msg").textContent="";body.dataset.lock="1";const f=api.check();const n=(S.att[t.id]||0);S.att[t.id]=n+1;
+  const wasUnl=wi<WORLDS.length-1&&unlocked(wi+1);
+  const award=Math.round(m*f*(n?0.5:1));const oldTotal=total(),oldRank=rankIdx(oldTotal);const gain=Math.max(0,award-best);if(award>best)S.best[t.id]=award;save();
+  const pct=Math.round(f*100);(f>=.99?SFX.ok:f>=.5?SFX.tap:SFX.bad)();
+  const last=ti===w.tasks.length-1;
+  $("#chk").remove();
+  $("#fb").innerHTML=`<div class="fb ${f>=.99?"good":f>=.5?"mid":"low"}"><div class="fbh">${f>=.99?"PERFEKT!":f>=.5?"GUT GEMACHT!":"NOCHMAL ÜBEN!"} <span>${pct} % richtig</span></div>
+  <div class="gain">${gain?`+${gain} ${COIN}`:(S.best[t.id]>=m?"Alle Münzen schon geholt":"Keine neuen Münzen – dein bisher bestes Ergebnis zählt")}</div>${t.explain?`<p class="ex">💡 ${esc(t.explain)}</p>`:""}
+  <div class="row"><button class="btn" onclick="go('task',${wi},${ti})">↺ NOCHMAL</button>${last?`<button class="btn" onclick="go('world',${wi})">ZUR WELT ▶</button>`:`<button class="btn" onclick="go('task',${wi},${ti+1})">WEITER ▶</button>`}</div></div>`;
+  document.querySelector(".hud").outerHTML=hud();
+  if(gain)coinRain(gain);
+  const nr=rankIdx(total());if(nr>oldRank)setTimeout(()=>levelUp(nr),700);
+  if(wi<WORLDS.length-1&&!wasUnl&&unlocked(wi+1))setTimeout(()=>unlockMsg(wi+1),nr>oldRank?1400:700);
+  $("#fb").scrollIntoView({behavior:"smooth",block:"nearest"});};}
+function unlockMsg(i){const w=WORLDS[i];SFX.lvl();const m=modal(`<div class="bigico">${w.icon}</div><h2 class="pixh">NEUE WELT!</h2><p>Welt ${i+1} „${esc(w.title)}“ ist jetzt freigeschaltet.</p><div class="row"><button class="btn" id="y">OK</button></div>`);m.querySelector("#y").onclick=()=>m.remove();}
+function levelUp(r){SFX.lvl();const m=modal(`<div class="bigico">⭐</div><h2 class="pixh">LEVEL UP!</h2><p>Du bist jetzt <b>Level ${r+1}</b>:</p><p class="rk">${esc(RANKS[r][1])}</p><div class="row"><button class="btn" id="y">WEITER</button></div>`);m.querySelector("#y").onclick=()=>m.remove();}
+function coinRain(n){for(let i=0;i<Math.min(n,12);i++){const c=document.createElement("div");c.className="rain";c.innerHTML=COIN;c.style.left=(10+Math.random()*80)+"%";c.style.animationDelay=(i*60)+"ms";document.body.appendChild(c);setTimeout(()=>c.remove(),1600);}}
+go(S.name?"map":"start");
+
+</script></body></html>
